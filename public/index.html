@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Basic Chat UI</title>
     <style>
         body {
@@ -90,55 +90,94 @@
         .input-container button:hover {
             background-color: #0056b3;
         }
+
+        #toast {
+            position: absolute;
+            top: 10px;
+            width: 25vh;
+            border-radius: 10px;
+            box-shadow: 2px 7px 34px 0px rgba(0, 0, 0, 0.75);
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .text {
+            padding: 0 1.5rem;
+        }
+
+        .close {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            color: gray;
+        }
+
+        .close:hover {
+            cursor: pointer;
+            box-shadow: 2px 7px 34px 0px rgba(0, 0, 0, 0.75);
+        }
     </style>
 </head>
 
 <body>
-
+    <div id="toast" class="hide">
+        <span class="close" onclick="handleClose()">x</span>
+        <p class="text"></p>
+    </div>
 
     <div class="chat-container">
-        <h1 style="text-align: center; margin: 10px 0; font-size: 1.5rem;">Simple Chat App</h1>
+        <h1 style="text-align: center; margin: 10px 0; font-size: 1.5rem">
+            Simple Chat App
+        </h1>
         <div class="messages">
-            <div id="received" class="message received">
-
-            </div>
-            <div id="sent" class="message sent">
-
-            </div>
+            <div id="received" class="message received"></div>
+            <div id="sent" class="message sent"></div>
         </div>
         <div class="input-container">
-            <input id="msg" type="text" placeholder="Type your message...">
+            <input id="msg" type="text" placeholder="Type your message..." />
             <button onclick="handleSend()">Send</button>
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io('http://localhost:3000');
-        const msg = document.getElementById("msg")
+        const socket = io("http://localhost:3000");
+        const msg = document.getElementById("msg");
+        const handleClose = () => {
+            const toast = document.getElementById("toast");
+            toast.classList.add("hide");
+        };
         const handleSend = () => {
             if (msg.value) {
-                const msgs = document.getElementById("sent")
-                const p = document.createElement('p');
-                const hr = document.createElement('br')
-                socket.emit("message", msg.value)
-                p.innerHTML = `${msg.value}`
-                msgs.appendChild(p)
-                msgs.appendChild(hr)
-                msg.value = ""
+                const msgs = document.getElementById("sent");
+                const p = document.createElement("p");
+                const hr = document.createElement("br");
+                socket.emit("message", msg.value);
+                p.innerHTML = `${msg.value}`;
+                msgs.appendChild(p);
+                msgs.appendChild(hr);
+                msg.value = "";
             }
-        }
+        };
         socket.on("message", (message) => {
-            const msgs = document.getElementById("received")
-            const p = document.createElement('p');
-            const hr = document.createElement('br')
-            p.innerHTML = message
-            msgs.appendChild(p)
-            msgs.appendChild(hr)
+            const msgs = document.getElementById("received");
+            const p = document.createElement("p");
+            const hr = document.createElement("br");
+            p.innerHTML = message;
+            msgs.appendChild(p);
+            msgs.appendChild(hr);
             window.scrollTo(0, document.body.scrollHeight);
-        })
+        });
+
+        socket.on("notification", (notification) => {
+            const toast = document.querySelector("#toast");
+            toast.classList.remove("hide");
+            document.querySelector(".text").innerHTML = notification;
+        });
         socket.on("disconnect", () => {
-            console.log("connection closed")
-        })
+            console.log("connection closed");
+        });
     </script>
 </body>
 
